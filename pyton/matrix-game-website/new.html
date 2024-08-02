@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Matrix Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      .card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      #board {
+        display: grid;
+        grid-template-columns: repeat(4, 60px);
+        grid-gap: 5px;
+        justify-content: center;
+        margin-bottom: 20px;
+      }
+
+      #board button {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+        background-color: #f2f2f2;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 10px;
+      }
+
+      .controls button {
+        margin: 0 5px;
+        padding: 8px 16px;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      #steps-left {
+        font-weight: bold;
+        color: #333;
+      }
+
+      @media (max-width: 480px) {
+        #board {
+          grid-template-columns: repeat(4, 50px);
+        }
+
+        #board button {
+          width: 50px;
+          height: 50px;
+          font-size: 16px;
+        }
+
+        .controls button {
+          padding: 6px 12px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body onload="initializeBoard()">
+    <div class="container">
+      <h1>Matrix Game</h1>
+      <div class="card">
+        <div id="board"></div>
+        <div class="controls">
+          <button id="left" onclick="moveLeft()">Left</button>
+          <button id="right" onclick="moveRight()">Right</button>
+          <button id="up" onclick="moveUp()">Up</button>
+          <button id="down" onclick="moveDown()">Down</button>
+        </div>
+        <p id="steps-left"></p>
+      </div>
+    </div>
+
+    <script>
+      let count = 1000;
+      let arr = [];
+      let arr2 = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+        [13, 14, 15, 0]
+      ];
+
+      function initializeBoard() {
+        const uniqueNumbers = Array.from({ length: 16 }, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+        arr = uniqueNumbers.map((value, index) => value === 16 ? 0 : value).map((value, index) => index % 4 === 0 ? [value] : [...arr[Math.floor(index / 4)], value]);
+
+        const board = document.getElementById('board');
+        board.innerHTML = ''; // Clear the board
+
+        for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+            const button = document.createElement('button');
+            button.textContent = arr[i][j] || '';
+            board.appendChild(button);
+          }
+        }
+
+        updateStepsLeft();
+      }
+
+      function updateStepsLeft() {
+        const stepsLeftElement = document.getElementById('steps-left');
+        stepsLeftElement.textContent = `Steps left: ${count}`;
+      }
+
+      function moveLeft() {
+        const [x, y] = findEmptyCell();
+        if (y > 0) {
+          [arr[x][y], arr[x][y - 1]] = [arr[x][y - 1], arr[x][y]];
+          updateBoard();
+          count--;
+          updateStepsLeft();
+        } else {
+          alert('Cannot move left');
+        }
+      }
+
+      function moveRight() {
+        const [x, y] = findEmptyCell();
+        if (y < 3) {
+          [arr[x][y], arr[x][y + 1]] = [arr[x][y + 1], arr[x][y]];
+          updateBoard();
+          count--;
+          updateStepsLeft();
+        } else {
+          alert('Cannot move right');
+        }
+      }
+
+      function moveUp() {
+        const [x, y] = findEmptyCell();
+        if (x > 0) {
+          [arr[x][y], arr[x - 1][y]] = [arr[x - 1][y], arr[x][y]];
+          updateBoard();
+          count--;
+          updateStepsLeft();
+        } else {
+          alert('Cannot move up');
+        }
+      }
+
+      function moveDown() {
+        const [x, y] = findEmptyCell();
+        if (x < 3) {
+          [arr[x][y], arr[x + 1][y]] = [arr[x + 1][y], arr[x][y]];
+          updateBoard();
+          count--;
+          updateStepsLeft();
+        } else {
+          alert('Cannot move down');
+        }
+      }
+
+      function findEmptyCell() {
+        for (let i = 0; i < 4; i++) {
+          for (let j = 0; j < 4; j++) {
+            if (arr[i][j] === 0) {
+              return [i, j];
+            }
+          }
+        }
+      }
+
+      function updateBoard() {
+        const board = document.getElementById('board');
+        const buttons = board.getElementsByTagName('button');
+        for (let i = 0; i < buttons.length; i++) {
+          const row = Math.floor(i / 4);
+          const col = i % 4;
+          buttons[i].textContent = arr[row][col] || '';
+        }
+
+        if (JSON.stringify(arr) === JSON.stringify(arr2)) {
+          alert('Congratulations! You won!!');
+        }
+      }
+
+      function quitGame() {
+        if (confirm('Are you sure you want to quit?')) {
+          window.close();
+        }
+      }
+    </script>
+  </body>
+</html>
